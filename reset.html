@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アプリを最新版に更新中…</title>
+<style>
+  body { font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;
+    display:flex; align-items:center; justify-content:center; min-height:100vh;
+    margin:0; background:#f6f7f9; color:#1f2430; font-size:16px; }
+</style>
+</head>
+<body>
+<div id="msg">🔄 アプリを最新版に更新しています…</div>
+<script>
+(async () => {
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) await r.unregister();
+    }
+    if (window.caches) {
+      for (const k of await caches.keys()) await caches.delete(k);
+    }
+    document.getElementById('msg').textContent = '✅ 更新しました。アプリに戻ります…';
+  } catch (e) {
+    document.getElementById('msg').textContent = '⚠️ ' + e.message;
+  }
+  setTimeout(() => { location.href = './index.html'; }, 900);
+})();
+</script>
+</body>
+</html>

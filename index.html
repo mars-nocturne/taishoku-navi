@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1d4ed8">
+  <title>退職届ナビ｜退職届の作成・郵送代行</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- アプリヘッダー -->
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="brand">
+        <span class="brand-mark">📮</span>
+        <div class="brand-text">
+          <strong>退職届ナビ</strong>
+          <small>退職届の作成・郵送代行 — あなたは待つだけ。</small>
+        </div>
+      </div>
+      <button class="icon-btn" id="opBtn" title="運営者" aria-label="運営者ログイン">⚙️</button>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ（各画面） -->
+  <main id="view" class="view"></main>
+
+  <!-- ボトムナビゲーション -->
+  <nav class="tabbar" id="tabbar">
+    <button class="tab" data-route="home"><span class="tab-ico">🏠</span><span>ホーム</span></button>
+    <button class="tab" data-route="order"><span class="tab-ico">📝</span><span>依頼</span></button>
+    <button class="tab" data-route="track"><span class="tab-ico">📦</span><span>追跡</span></button>
+    <button class="tab" data-route="know"><span class="tab-ico">📖</span><span>知識</span></button>
+    <button class="tab" data-route="admin" id="adminTab" hidden><span class="tab-ico">🗂️</span><span>管理</span></button>
+  </nav>
+
+  <!-- モーダル -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <!-- トースト -->
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- 印刷専用エリア（画面には表示されない） -->
+  <div id="printArea" aria-hidden="true"></div>
+
+  <!-- defer で順序を保ちつつ非ブロッキング読込（CDN不通でも本体は動作） -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="config.js"></script>
+  <script defer src="cloud.js"></script>
+  <script defer src="app.js"></script>
+</body>
+</html>
