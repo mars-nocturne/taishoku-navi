@@ -9,6 +9,9 @@ const CFG = window.TAISHOKU_CONFIG || {};
 const DRAFT_KEY = 'taishoku_draft_v1';
 const CHECKS_KEY = 'taishoku_checks_v1';
 
+/* ブラウザが自動表示する「ホーム画面に追加」促進を抑制（インストールなしでも普通に使えるため） */
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); });
+
 /* ---------- 日付ユーティリティ ---------- */
 function toYmd(d) {
   const p = n => String(n).padStart(2, '0');
