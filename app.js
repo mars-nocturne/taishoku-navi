@@ -86,6 +86,7 @@ const defaultDraft = () => ({
   presTitle: '代表取締役', presName: '', envDept: '人事部',
   taishokuDate: addDays(new Date(), 21),
   submitDate: toYmd(new Date()),
+  shipDate: '',              // 発送希望日（空欄＝入金確認後すみやかに発送）
   email: '', tel: '',
   shibutsu: 'none',          // 私物の扱い（添え状に記載）
   yukyuUse: false, yukyuFrom: '',  // 有給消化の申し出（添え状に記載）
@@ -459,6 +460,7 @@ function renderOrder() {
         ${f('submitDate', '書類の日付', '', true, '', 'date')}
       </div>
       <p class="small muted">郵送の到達から2週間で退職できます（民法627条）。余裕をもって<strong>3週間以上先</strong>の退職日をおすすめします。書類の日付は通常、依頼日のままでOKです。</p>
+      ${f('shipDate', '発送希望日（任意）', '', false, '空欄なら入金確認後、原則3営業日以内に発送します。指定する場合は、先に入金確認が必要なこと・配達に1〜3日かかることを見込んでください。到着日のお約束はできません', 'date')}
       <div class="seg" id="eraSeg">
         <button data-era="wareki" class="${D.eraMode === 'wareki' ? 'on' : ''}">和暦（令和）</button>
         <button data-era="seireki" class="${D.eraMode === 'seireki' ? 'on' : ''}">西暦</button>
@@ -597,6 +599,12 @@ async function submitOrder() {
     if (!D[key]) { toast(`「${label}」を入力してください`); return; }
   }
   if (D.yukyuUse && !D.yukyuFrom) { toast('有給の開始日を入力してください'); return; }
+  if (D.shipDate) {
+    if (D.shipDate < toYmd(new Date())) { toast('発送希望日は今日以降の日付にしてください'); return; }
+    // 発送→配達1〜3日→到達から2週間で退職成立（民法627条）の余裕チェック
+    if (D.shipDate > addDays(new Date(D.taishokuDate), -16) &&
+        !confirm('発送希望日から退職日までの余裕が少なめです。\n配達（発送から1〜3日）の到達後2週間で退職が成立するため、退職日までに2週間を確保できない可能性があります。\nこのまま確定しますか？')) return;
+  }
   if (!signed) { toast('署名を入力してください'); return; }
   if (!($('#ag1').checked && $('#ag2').checked && $('#ag3').checked)) {
     toast('確認事項3つすべてにチェックしてください'); return;
@@ -664,6 +672,7 @@ async function renderTrack() {
           </div>
           <span class="badge ${st.badge}">${st.label}</span>
         </div>
+        ${p.shipDate && ['awaiting_payment', 'paid'].includes(o.status) ? `<div class="item-body small muted">📅 発送希望日：${fmtDateH(p.shipDate, 'wareki')}（入金確認後に発送します）</div>` : ''}
         ${o.status === 'shipped' && o.tracking_no ? `<div class="item-body">🚚 追跡番号：<strong>${esc(o.tracking_no)}</strong>（郵便局の追跡サービスで確認できます）</div>` : ''}
         ${o.status === 'shipped' ? `<div class="item-body small muted">配達されると退職の意思表示は到達済み。到達から2週間で退職成立です（民法627条）。</div>` : ''}
         ${o.status === 'awaiting_payment' ? bankHtml(o.order_no) + `
@@ -787,7 +796,7 @@ async function renderAdmin() {
         <div class="item-head">
           <div>
             <div class="item-title">${esc(o.order_no)}　${esc(p.name || '')}</div>
-            <div class="item-meta">${esc(p.company || '')}／退職日 ${fmtDateH(p.taishokuDate, 'wareki')}／受付 ${new Date(o.created_at).toLocaleDateString('ja-JP')}</div>
+            <div class="item-meta">${esc(p.company || '')}／退職日 ${fmtDateH(p.taishokuDate, 'wareki')}／受付 ${new Date(o.created_at).toLocaleDateString('ja-JP')}${p.shipDate ? '／📅 発送希望 ' + fmtDateH(p.shipDate, 'wareki') : ''}</div>
           </div>
           <span class="badge ${st.badge}">${st.label}</span>
         </div>
@@ -799,7 +808,8 @@ async function renderAdmin() {
             宛先：〒${esc(p.companyPostal || '')} ${esc(p.companyAddr || '')}<br>
             宛名：${esc(p.company || '')} ${esc(p.envDept ? p.envDept + ' 御中' : (p.presTitle + ' ' + p.presName + ' 様'))}<br>
             書類：${p.docType === 'negai' ? '退職願' : '退職届'}／書類日付 ${fmtDateH(p.submitDate, 'wareki')}／${yen(p.price)}<br>
-            オプション：私物=${(SHIBUTSU[p.shibutsu] || SHIBUTSU.none).label}／有給=${p.yukyuUse && p.yukyuFrom ? fmtDateH(p.yukyuFrom, 'wareki') + 'から取得' : '記載なし'}
+            オプション：私物=${(SHIBUTSU[p.shibutsu] || SHIBUTSU.none).label}／有給=${p.yukyuUse && p.yukyuFrom ? fmtDateH(p.yukyuFrom, 'wareki') + 'から取得' : '記載なし'}<br>
+            発送希望日：${p.shipDate ? fmtDateH(p.shipDate, 'wareki') : '指定なし（入金確認後すみやかに発送）'}
             ${p.sig ? `<div>署名：<img src="${p.sig}" alt="署名" style="max-height:140px;border:1px solid var(--line);border-radius:6px;background:#fff;"></div>` : ''}
           </div>
         </details>
