@@ -23,8 +23,8 @@ window.TAISHOKU_CONFIG = {
      bankName が空欄の間はアプリ上では「準備中」と表示されます。
      TODO: 銀行名・支店名・口座名義（カナ）を記入したら公開できます */
   bank: {
-    bankName: "",       // TODO: 銀行名を記入（例: "GMOあおぞらネット銀行"）
-    branch: "005",      // 店番005。支店名がある銀行なら「○○支店」に置き換え
+    bankName: "PayPay銀行",
+    branch: "ビジネス営業部（店番005）",
     accountType: "普通",
     accountNo: "2282525",
     holder: "",         // TODO: 口座名義カナを記入（例: "ポジティブキャリア カザマ カズオ"）
