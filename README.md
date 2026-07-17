@@ -31,6 +31,32 @@
 運営者の判定はサーバー側（SQL関数のUID照合）で行い、クライアントは RPC で結果だけを受け取る。
 コード内に運営者のメールアドレス等の識別情報は置かない。
 
+## 新規依頼のメール通知（Edge Function）
+
+新しい依頼の INSERT／キャンセルを Webhook で受けて、運営者メールに通知する。
+コードは `supabase/functions/notify-order/index.ts`。設定手順：
+
+1. [Resend](https://resend.com) に無料登録して API キーを発行
+   （無料枠のままなら差出人は `onboarding@resend.dev`、送信先は自分の登録メールのみ。
+   独自ドメインを認証すれば任意の宛先・差出人にできる）
+2. Supabase CLI でデプロイとシークレット設定：
+
+   ```
+   supabase functions deploy notify-order --no-verify-jwt --project-ref drkxgjvoqgqjubderbab
+   supabase secrets set RESEND_API_KEY=re_xxxx WEBHOOK_SECRET=＜ランダムな合言葉＞ --project-ref drkxgjvoqgqjubderbab
+   ```
+
+   （CLI を使わない場合はダッシュボード > Edge Functions で `notify-order` を作成して
+   コードを貼り付け、「Verify JWT」をオフに。シークレットは Edge Functions > Secrets で設定）
+3. ダッシュボード > Database > Webhooks で新規作成：
+   - テーブル `taishoku_orders`、イベント **Insert と Update**
+   - タイプ HTTP Request / POST、URL `https://drkxgjvoqgqjubderbab.supabase.co/functions/v1/notify-order`
+   - HTTP ヘッダーに `x-webhook-secret: ＜手順2と同じ合言葉＞` を追加
+4. アプリから試しに依頼を1件入れて、`positive.career.2026@gmail.com` に
+   「【退職届ナビ】新しい依頼 T-xxxx」が届けば完了（テスト注文は管理タブでキャンセル）
+
+通知先や差出人を変えるときはシークレット `NOTIFY_TO` / `MAIL_FROM` を設定する。
+
 ## 技術構成
 
 - バニラJS・ビルド不要（union_app と同じ構成）
