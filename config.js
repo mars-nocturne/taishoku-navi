@@ -23,10 +23,10 @@ window.TAISHOKU_CONFIG = {
      bankName を空欄に戻すとアプリ上では「準備中」表示になります */
   bank: {
     bankName: "PayPay銀行",
-    branch: "ビジネス営業部（店番005）",
+    branch: "ビジネス営業部（店番号005）",
     accountType: "普通",
     accountNo: "2282525",
-    holder: "ポジティブキャリア ホウライ カズオ",
+    holder: "ポジティブキヤリア ホウライカズオ",
   },
 
   /* お問い合わせ先（アプリ内・法定表記に表示） */

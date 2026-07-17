@@ -340,7 +340,7 @@ function bankHtml(orderNo) {
       <tr><th>銀行</th><td>${esc(b.bankName)}</td></tr>
       <tr><th>支店</th><td>${esc(b.branch)}</td></tr>
       <tr><th>口座</th><td>${esc(b.accountType)}　${esc(b.accountNo)}</td></tr>
-      <tr><th>名義</th><td>${esc(b.holder)}</td></tr>
+      <tr><th>名義</th><td>${esc(b.holder) || '（確認中 — 振込画面に表示される名義をご確認ください）'}</td></tr>
       <tr><th>金額</th><td><strong>${yen(CFG.price)}</strong>（振込手数料はご負担ください）</td></tr>
     </table>` : `
     <p class="small">振込先口座は現在準備中です。準備が整い次第、<a href="mailto:${esc(CFG.contactEmail)}">${esc(CFG.contactEmail)}</a> からご連絡します。受付番号を控えてお待ちください。</p>`;

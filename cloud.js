@@ -9,9 +9,20 @@ window.Cloud = (() => {
   const cfg = window.TAISHOKU_CONFIG || {};
   let sb = null;
   let currentUser = null;
+  let operator = false;
 
   function available() {
     return !!(cfg.url && cfg.anonKey && window.supabase);
+  }
+
+  /* 運営者かどうかはサーバー側（SupabaseのSQL関数）に問い合わせる。
+     クライアントには運営者の識別情報を一切持たない。 */
+  async function refreshOperator() {
+    try {
+      const { data, error } = await sb.rpc('taishoku_is_operator');
+      operator = !error && data === true;
+    } catch (e) { operator = false; }
+    return operator;
   }
 
   /* 初期化：セッションがなければ匿名サインイン */
@@ -26,6 +37,7 @@ window.Cloud = (() => {
       }
       const { data: { user } } = await sb.auth.getUser();
       currentUser = user;
+      await refreshOperator();
       return true;
     } catch (e) {
       console.warn('Cloud init failed:', e.message);
@@ -33,10 +45,7 @@ window.Cloud = (() => {
     }
   }
 
-  function isOperator() {
-    return !!(currentUser && currentUser.email &&
-      currentUser.email.toLowerCase() === String(cfg.operatorEmail || '').toLowerCase());
-  }
+  function isOperator() { return operator; }
 
   /* ---------- 依頼者 ---------- */
   async function createOrder(payload) {
@@ -66,7 +75,7 @@ window.Cloud = (() => {
     if (error) throw error;
     const { data: { user } } = await sb.auth.getUser();
     currentUser = user;
-    return isOperator();
+    return await refreshOperator();
   }
 
   async function logoutOperator() {
@@ -74,6 +83,7 @@ window.Cloud = (() => {
     await sb.auth.signInAnonymously();
     const { data: { user } } = await sb.auth.getUser();
     currentUser = user;
+    operator = false;
   }
 
   async function allOrders() {

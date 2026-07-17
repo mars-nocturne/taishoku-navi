@@ -24,9 +24,12 @@
 
 ## 初回セットアップ（未実施ならこの2つ）
 
-1. Supabase ダッシュボード > SQL Editor で `supabase_setup.sql` を実行
-2. Authentication > Users > Add user で運営者アカウントを作成
-   （Email: config.js の operatorEmail、Auto Confirm にチェック）
+1. Authentication > Users > Add user で運営者アカウントを作成（Auto Confirm にチェック）し、
+   発行された User UID を `supabase_setup.sql` の `taishoku_is_operator()` に書き込む
+2. Supabase ダッシュボード > SQL Editor で `supabase_setup.sql` を実行
+
+運営者の判定はサーバー側（SQL関数のUID照合）で行い、クライアントは RPC で結果だけを受け取る。
+コード内に運営者のメールアドレス等の識別情報は置かない。
 
 ## 技術構成
 
