@@ -26,7 +26,7 @@ window.TAISHOKU_CONFIG = {
     branch: "ビジネス営業部（店番号005）",
     accountType: "普通",
     accountNo: "2282525",
-    holder: "ポジティブキヤリア ホウライカズオ",
+    holder: "ポジティブキヤリアホウライカズオ",
   },
 
   /* お問い合わせ先（アプリ内・法定表記に表示） */
