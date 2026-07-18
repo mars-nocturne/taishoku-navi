@@ -1,28 +1,45 @@
 /* ============================================================
    退職届ナビ — 注文通知 Edge Function
    ------------------------------------------------------------
-   taishoku_orders への INSERT（新規依頼）と、UPDATE で
-   status が cancelled になった時に、運営者へメールで知らせる。
+   taishoku_orders の変化を Database Webhook で受けてメールを送る。
 
-   呼び出し元：Supabase Database Webhook（README の手順で作成）
-   メール送信：Resend API（https://resend.com）
+   【運営者宛】常に有効
+     - 新規依頼（INSERT）
+     - キャンセル（status → cancelled）
+   【お客様宛】シークレット CUSTOMER_MAIL=on のときだけ有効
+     ※Resendで独自ドメインを認証してから on にすること。
+       未認証のまま on にすると送信は失敗する（運営者宛には影響しない）
+     - 受付確認＋振込案内（INSERT）
+     - 入金確認・作業開始（status → paid）
+     - 発送完了＋追跡番号（status → shipped）
+     - キャンセル受付（status → cancelled）
 
    必要なシークレット（supabase secrets set で設定）:
      RESEND_API_KEY … Resend の API キー
      WEBHOOK_SECRET … Webhook のヘッダー x-webhook-secret と同じ値（合言葉）
    任意:
-     NOTIFY_TO      … 通知先（省略時は下の DEFAULT_TO）
-     MAIL_FROM      … 差出人（省略時は Resend のオンボーディング用アドレス。
-                       独自ドメインを Resend で認証したら変更する）
+     NOTIFY_TO      … 運営者通知の宛先（省略時は DEFAULT_TO）
+     MAIL_FROM      … 差出人。独自ドメイン認証後は「退職届ナビ <info@あなたのドメイン>」
+                       のように設定する（省略時は Resend のオンボーディング用）
+     CUSTOMER_MAIL  … "on" でお客様宛メールを有効化
    ============================================================ */
 
 const DEFAULT_TO = "positive.career.2026@gmail.com";
 const DEFAULT_FROM = "退職届ナビ <onboarding@resend.dev>";
 const APP_URL = "https://mars-nocturne.github.io/taishoku-navi/";
 
+/* 振込先（config.js の bank と同じ内容を維持すること） */
+const BANK_LINES = [
+  "銀行　：PayPay銀行",
+  "支店　：ビジネス営業部（店番号005）",
+  "口座　：普通 2282525",
+  "名義　：ポジティブキヤリアホウライカズオ",
+];
+
 type OrderRecord = {
   order_no?: string;
   status?: string;
+  tracking_no?: string;
   created_at?: string;
   payload?: Record<string, unknown>;
 };
@@ -30,22 +47,140 @@ type OrderRecord = {
 function s(v: unknown): string {
   return typeof v === "string" && v.trim() ? v.trim() : "—";
 }
+function p(r: OrderRecord): Record<string, unknown> {
+  return (r.payload ?? {}) as Record<string, unknown>;
+}
+function yen(v: unknown): string {
+  return "¥" + Number(v ?? 0).toLocaleString("ja-JP");
+}
 
 function orderSummary(r: OrderRecord): string {
-  const p = (r.payload ?? {}) as Record<string, unknown>;
-  const lines = [
+  const d = p(r);
+  return [
     `受付番号　：${s(r.order_no)}`,
-    `書類　　　：${p.docType === "negai" ? "退職願" : "退職届"}`,
-    `氏名　　　：${s(p.name)}`,
-    `会社　　　：${s(p.company)}`,
-    `退職日　　：${s(p.taishokuDate)}`,
-    `発送希望日：${typeof p.shipDate === "string" && p.shipDate ? p.shipDate : "指定なし（入金確認後すみやかに）"}`,
-    `料金　　　：¥${Number(p.price ?? 0).toLocaleString("ja-JP")}`,
-    `連絡先　　：${s(p.email)} ／ ${s(p.tel)}`,
+    `書類　　　：${d.docType === "negai" ? "退職願" : "退職届"}`,
+    `氏名　　　：${s(d.name)}`,
+    `会社　　　：${s(d.company)}`,
+    `退職日　　：${s(d.taishokuDate)}`,
+    `発送希望日：${typeof d.shipDate === "string" && d.shipDate ? d.shipDate : "指定なし（入金確認後すみやかに）"}`,
+    `料金　　　：${yen(d.price)}`,
+    `連絡先　　：${s(d.email)} ／ ${s(d.tel)}`,
     "",
     `管理タブ　：${APP_URL}`,
-  ];
-  return lines.join("\n");
+  ].join("\n");
+}
+
+const SIGNATURE = [
+  "──────────────────",
+  "退職届ナビ（ポジティブキャリア）",
+  APP_URL,
+  "このメールに返信いただければ運営者に届きます。",
+].join("\n");
+
+/* お客様宛の文面（kind ごと） */
+function customerMail(kind: "received" | "paid" | "shipped" | "cancelled", r: OrderRecord):
+  { subject: string; text: string } | null {
+  const d = p(r);
+  const name = typeof d.name === "string" && d.name.trim() ? `${d.name.trim()} 様` : "お客様";
+  const no = s(r.order_no);
+
+  if (kind === "received") {
+    return {
+      subject: `【退職届ナビ】ご依頼を受け付けました（受付番号 ${no}）`,
+      text: [
+        `${name}`,
+        "",
+        "退職届ナビをご利用いただきありがとうございます。",
+        "以下の内容でご依頼を受け付けました。",
+        "",
+        `受付番号：${no}`,
+        `料金　　：${yen(d.price)}（税込・前払い）`,
+        "",
+        "下記の口座へお振込みをお願いいたします。",
+        "ご入金の確認をもって、退職届の作成・発送作業を開始します。",
+        "",
+        ...BANK_LINES,
+        "",
+        `※振込名義の先頭に受付番号をお付けください（例：「${no} ヤマダタロウ」）`,
+        "※振込手数料はご負担ください",
+        "※受付から14日以内にご入金が確認できない場合、キャンセル扱いとなることがあります",
+        "",
+        "進み具合はアプリの「追跡」タブからいつでも確認できます。",
+        "発送前であればキャンセルも可能です。",
+        "",
+        SIGNATURE,
+      ].join("\n"),
+    };
+  }
+  if (kind === "paid") {
+    return {
+      subject: `【退職届ナビ】ご入金を確認しました（受付番号 ${no}）`,
+      text: [
+        `${name}`,
+        "",
+        "ご入金を確認いたしました。ありがとうございます。",
+        "これより退職届の作成・印刷・発送作業に入ります。",
+        "発送が完了しましたら、追跡番号をメールとアプリでお知らせします。",
+        "",
+        SIGNATURE,
+      ].join("\n"),
+    };
+  }
+  if (kind === "shipped") {
+    return {
+      subject: `【退職届ナビ】退職届を発送しました（受付番号 ${no}）`,
+      text: [
+        `${name}`,
+        "",
+        "退職届を簡易書留にて発送いたしました。",
+        "",
+        `追跡番号：${s(r.tracking_no)}`,
+        "（日本郵便の追跡サービスで配達状況を確認できます）",
+        "",
+        "配達された時点で退職の意思表示は会社に到達したことになり、",
+        "到達から2週間で退職が成立します（民法627条）。",
+        "配達状況はアプリの「追跡」タブでも確認できます。",
+        "",
+        SIGNATURE,
+      ].join("\n"),
+    };
+  }
+  if (kind === "cancelled") {
+    return {
+      subject: `【退職届ナビ】キャンセルを承りました（受付番号 ${no}）`,
+      text: [
+        `${name}`,
+        "",
+        `受付番号 ${no} のご依頼のキャンセルを承りました。`,
+        "ご入金済みの場合は、振込手数料を差し引いた全額を返金いたします。",
+        "返金先の口座情報を、このメールへの返信でお知らせください。",
+        "",
+        "またのご利用をお待ちしております。",
+        "",
+        SIGNATURE,
+      ].join("\n"),
+    };
+  }
+  return null;
+}
+
+async function sendMail(to: string, subject: string, text: string): Promise<boolean> {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY") ?? ""}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: Deno.env.get("MAIL_FROM") ?? DEFAULT_FROM,
+      to: [to],
+      reply_to: Deno.env.get("NOTIFY_TO") ?? DEFAULT_TO,
+      subject,
+      text,
+    }),
+  });
+  if (!res.ok) console.error(`Resend error (${to}):`, res.status, await res.text());
+  return res.ok;
 }
 
 Deno.serve(async (req) => {
@@ -63,39 +198,51 @@ Deno.serve(async (req) => {
   }
 
   const { type, record, old_record } = body;
-  let subject = "";
-  let text = "";
+  if (!record) return new Response("ignored", { status: 200 });
 
-  if (type === "INSERT" && record) {
-    subject = `【退職届ナビ】新しい依頼 ${s(record.order_no)}`;
-    text = `新しい依頼が入りました。入金をお待ちください。\n\n${orderSummary(record)}`;
-  } else if (
-    type === "UPDATE" && record?.status === "cancelled" &&
-    old_record?.status !== "cancelled"
-  ) {
-    subject = `【退職届ナビ】依頼キャンセル ${s(record.order_no)}`;
-    text = `依頼がキャンセルされました。入金済みの場合は返金対応をしてください。\n\n${orderSummary(record)}`;
-  } else {
+  const customerOn = (Deno.env.get("CUSTOMER_MAIL") ?? "") === "on";
+  const customerTo = typeof p(record).email === "string" ? (p(record).email as string).trim() : "";
+  const operatorTo = Deno.env.get("NOTIFY_TO") ?? DEFAULT_TO;
+  const jobs: Promise<boolean>[] = [];
+
+  /* イベント判定 */
+  let operatorMail: { subject: string; text: string } | null = null;
+  let customerKind: "received" | "paid" | "shipped" | "cancelled" | null = null;
+
+  if (type === "INSERT") {
+    operatorMail = {
+      subject: `【退職届ナビ】新しい依頼 ${s(record.order_no)}`,
+      text: `新しい依頼が入りました。入金をお待ちください。\n\n${orderSummary(record)}`,
+    };
+    customerKind = "received";
+  } else if (type === "UPDATE" && record.status !== old_record?.status) {
+    if (record.status === "cancelled") {
+      operatorMail = {
+        subject: `【退職届ナビ】依頼キャンセル ${s(record.order_no)}`,
+        text: `依頼がキャンセルされました。入金済みの場合は返金対応をしてください。\n\n${orderSummary(record)}`,
+      };
+      customerKind = "cancelled";
+    } else if (record.status === "paid") {
+      customerKind = "paid";
+    } else if (record.status === "shipped") {
+      customerKind = "shipped";
+    }
+  }
+
+  if (!operatorMail && !customerKind) {
     // 対象外のイベントは黙って成功扱い（Webhook のリトライを防ぐ）
     return new Response("ignored", { status: 200 });
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY") ?? ""}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: Deno.env.get("MAIL_FROM") ?? DEFAULT_FROM,
-      to: [Deno.env.get("NOTIFY_TO") ?? DEFAULT_TO],
-      subject,
-      text,
-    }),
-  });
+  if (operatorMail) jobs.push(sendMail(operatorTo, operatorMail.subject, operatorMail.text));
+  if (customerOn && customerKind && customerTo && customerTo.includes("@")) {
+    const m = customerMail(customerKind, record);
+    if (m) jobs.push(sendMail(customerTo, m.subject, m.text));
+  }
 
-  if (!res.ok) {
-    console.error("Resend error:", res.status, await res.text());
+  const results = await Promise.all(jobs);
+  // 1通でも送れていれば 200（部分失敗はログで追う）。全滅のみ 500 でリトライさせる
+  if (results.length && results.every((ok) => !ok)) {
     return new Response("mail failed", { status: 500 });
   }
   return new Response("ok", { status: 200 });

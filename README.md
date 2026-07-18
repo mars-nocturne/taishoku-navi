@@ -58,6 +58,23 @@
 
 通知先や差出人を変えるときはシークレット `NOTIFY_TO` / `MAIL_FROM` を設定する。
 
+### お客様宛の自動メール（受付確認・入金確認・発送完了・キャンセル）
+
+コードには実装済み。有効化には **独自ドメインの Resend 認証が必要**（無料枠は
+未認証だと登録者本人宛にしか送れないため）。手順：
+
+1. ドメインを取得（年1,000〜2,000円程度。Cloudflare Registrar・お名前.com など）
+2. Resend ダッシュボード > Domains > Add Domain でドメインを登録し、
+   表示される DNS レコード（DKIM 等）をドメイン側に追加して Verify
+3. シークレットを追加：
+   - `MAIL_FROM` = `退職届ナビ <info@あなたのドメイン>`
+   - `CUSTOMER_MAIL` = `on`
+4. ダッシュボードの Edge Functions > notify-order > Code で最新の
+   `supabase/functions/notify-order/index.ts` を貼り直して再デプロイ
+
+`CUSTOMER_MAIL=on` にするまでお客様宛は一切送られない（運営者通知のみ）。
+振込先の記載（`BANK_LINES`）は `config.js` の `bank` と同期を保つこと。
+
 ## 技術構成
 
 - バニラJS・ビルド不要（union_app と同じ構成）
