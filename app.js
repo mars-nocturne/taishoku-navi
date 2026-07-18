@@ -879,7 +879,7 @@ function openOperatorLogin() {
       <button class="btn btn-ghost" id="opCancel">閉じる</button>
       <button class="btn btn-primary" id="opLogin">ログイン</button>
     </div>
-    <p class="small muted" style="margin-top:10px;">※ご利用者の方はログイン不要です。このままお使いください。</p>
+    <p class="small muted" style="margin-top:10px;">※このページは運営者専用です。ご利用者の方はトップページ（index.html）をお使いください。</p>
   `);
   $('#opCancel').addEventListener('click', closeModal);
   $('#opLogin').addEventListener('click', async () => {
@@ -917,14 +917,24 @@ document.getElementById('tabbar').addEventListener('click', e => {
 document.getElementById('view').addEventListener('click', e => {
   const el = e.target.closest('[data-go]'); if (el) go(el.dataset.go);
 });
-document.getElementById('opBtn').addEventListener('click', openOperatorLogin);
+/* 管理機能は admin.html（運営者専用ページ）でのみ有効。
+   お客様用ページ（index.html）には⚙️ボタンも管理タブも存在しない */
+const IS_ADMIN_PAGE = document.body.dataset.page === 'admin';
+const opBtn = document.getElementById('opBtn');
+if (opBtn) opBtn.addEventListener('click', openOperatorLogin);
 
 go('home');
 
-/* クラウド初期化（裏で実行。完了後に運営者タブの表示判定） */
+/* クラウド初期化（裏で実行。管理ページでは運営者タブの表示判定＋ログイン誘導） */
 (async () => {
   cloudReady = await Cloud.init();
-  if (cloudReady && Cloud.isOperator()) $('#adminTab').hidden = false;
+  if (!IS_ADMIN_PAGE) return;
+  if (cloudReady && Cloud.isOperator()) {
+    $('#adminTab').hidden = false;
+    go('admin');
+  } else {
+    openOperatorLogin();
+  }
 })();
 
 /* ---------- Service Worker 登録 ---------- */
