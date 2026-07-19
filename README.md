@@ -19,8 +19,9 @@
 ```
 
 - **料金・振込先・発送方法**は `config.js` で設定（口座ができたら `bank` を記入）
-- **管理画面**は運営者専用ページ `admin.html`（例: https://mars-nocturne.github.io/taishoku-navi/admin.html ）
-  からログイン。お客様用ページには管理系のUIは一切出ない。URLはアプリからリンクせず noindex
+- **公開URL**: https://taishoku-yasui.com （カスタムドメイン。旧 mars-nocturne.github.io/taishoku-navi/ からは自動転送）
+- **管理画面**は運営者専用ページ https://taishoku-yasui.com/admin.html からログイン。
+  お客様用ページには管理系のUIは一切出ない。URLはアプリからリンクせず noindex
 - 会社との交渉は行わない（非弁行為の回避）— 利用規約 第2条に明記
 
 ## 初回セットアップ（未実施ならこの2つ）

@@ -27,7 +27,7 @@
 
 const DEFAULT_TO = "positive.career.2026@gmail.com";
 const DEFAULT_FROM = "退職届ナビ <onboarding@resend.dev>";
-const APP_URL = "https://mars-nocturne.github.io/taishoku-navi/";
+const APP_URL = "https://taishoku-yasui.com/";
 
 /* 振込先（config.js の bank と同じ内容を維持すること） */
 const BANK_LINES = [
