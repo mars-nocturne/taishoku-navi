@@ -628,6 +628,7 @@ async function submitOrder() {
         <p class="muted small" style="margin:0;">受付番号</p>
         <p style="font-size:36px;font-weight:800;color:var(--blue);margin:2px 0 8px;letter-spacing:.05em;">${esc(row.order_no)}</p>
         <p class="small">この番号は<strong>追跡タブ</strong>からいつでも確認できます。</p>
+        <p class="small muted">ご入力のメールアドレスに受付確認メールをお送りしました。届いていない場合は<strong>迷惑メールフォルダ</strong>をご確認ください。</p>
       </div>
       ${bankHtml(row.order_no)}
       <button class="btn btn-primary" data-go="track">📦 追跡タブへ</button>

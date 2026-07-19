@@ -1,5 +1,5 @@
 /* 退職届ナビ Service Worker — オフライン対応 */
-const CACHE = 'taishoku-app-v15';
+const CACHE = 'taishoku-app-v16';
 const ASSETS = [
   './',
   './index.html',
