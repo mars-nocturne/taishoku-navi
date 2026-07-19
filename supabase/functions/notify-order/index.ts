@@ -12,6 +12,7 @@
      - 受付確認＋振込案内（INSERT）
      - 入金確認・作業開始（status → paid）
      - 発送完了＋追跡番号（status → shipped）
+     - 配達確認・完了のご挨拶（status → done）
      - キャンセル受付（status → cancelled）
 
    必要なシークレット（supabase secrets set で設定）:
@@ -78,7 +79,7 @@ const SIGNATURE = [
 ].join("\n");
 
 /* お客様宛の文面（kind ごと） */
-function customerMail(kind: "received" | "paid" | "shipped" | "cancelled", r: OrderRecord):
+function customerMail(kind: "received" | "paid" | "shipped" | "done" | "cancelled", r: OrderRecord):
   { subject: string; text: string } | null {
   const d = p(r);
   const name = typeof d.name === "string" && d.name.trim() ? `${d.name.trim()} 様` : "お客様";
@@ -140,6 +141,31 @@ function customerMail(kind: "received" | "paid" | "shipped" | "cancelled", r: Or
         "配達された時点で退職の意思表示は会社に到達したことになり、",
         "到達から2週間で退職が成立します（民法627条）。",
         "配達状況はアプリの「追跡」タブでも確認できます。",
+        "",
+        SIGNATURE,
+      ].join("\n"),
+    };
+  }
+  if (kind === "done") {
+    return {
+      subject: `【退職届ナビ】退職届が会社に配達されました（受付番号 ${no}）`,
+      text: [
+        `${name}`,
+        "",
+        "退職届の配達が確認できましたので、ご連絡いたします。",
+        "",
+        "配達された時点で、退職の意思表示は会社に到達しています。",
+        "到達から2週間が経過すると退職が成立します（民法627条）。",
+        "会社の承認は必要ありません。",
+        "",
+        "退職にあたっては、次の手続きもお忘れなく：",
+        "・健康保険の切り替え（退職日の翌日から14日以内が目安）",
+        "・年金の切り替え（国民年金など）",
+        "・離職票・源泉徴収票の受け取り（会社から郵送されます）",
+        `詳しくはアプリの「知識」タブにチェックリストがあります → ${APP_URL}`,
+        "",
+        "このたびはご利用いただき、誠にありがとうございました。",
+        "新しい一歩を、心より応援しています。",
         "",
         SIGNATURE,
       ].join("\n"),
@@ -207,7 +233,7 @@ Deno.serve(async (req) => {
 
   /* イベント判定 */
   let operatorMail: { subject: string; text: string } | null = null;
-  let customerKind: "received" | "paid" | "shipped" | "cancelled" | null = null;
+  let customerKind: "received" | "paid" | "shipped" | "done" | "cancelled" | null = null;
 
   if (type === "INSERT") {
     operatorMail = {
@@ -226,6 +252,8 @@ Deno.serve(async (req) => {
       customerKind = "paid";
     } else if (record.status === "shipped") {
       customerKind = "shipped";
+    } else if (record.status === "done") {
+      customerKind = "done";
     }
   }
 
