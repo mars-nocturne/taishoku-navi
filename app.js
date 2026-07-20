@@ -375,38 +375,33 @@ function renderHome() {
       <span class="hero-badge">全国対応・郵送で完結</span>
       <h2>言いにくいことは、<br>手紙にしよう。</h2>
       <p>正式な退職届をお作りして、あなたに代わって<strong>${esc(CFG.shipMethod)}で会社へ郵送</strong>します。手渡しも、対面も、電話も、もういらない。</p>
-      <div class="hero-price">
-        <div class="hp-label">安心の定額プラン</div>
-        <div class="hp-row">
-          <span class="hp-amount">${yen(CFG.price)}</span>
-          <span class="hp-note">（税込・追加費用なし）</span>
-        </div>
-        <div class="hp-sub">退職届の作成＋印刷＋封入＋${esc(CFG.shipMethod)}での発送まで全部込み</div>
-      </div>
     </div>
 
-    <button class="btn btn-primary" data-go="order" style="margin-bottom:6px;">📝 いますぐ依頼する</button>
-    <p class="small muted center" style="margin:0 0 16px;">追加費用なし・全国どこでも対応</p>
+    <div class="hero-price">
+      <div class="hp-label">安心の定額プラン</div>
+      <div class="hp-row">
+        <span class="hp-amount">${yen(CFG.price)}</span>
+        <span class="hp-note">（税込・追加費用なし）</span>
+      </div>
+      <div class="hp-sub">退職届の作成＋印刷＋封入＋${esc(CFG.shipMethod)}での発送まで全部込み</div>
+    </div>
 
-    <div class="section-title">📋 ご利用の流れ</div>
-    ${[
-      ['フォームに入力＋指で署名', '退職届はこちらで正式な縦書き書類に仕上げます'],
-      ['受付番号が発行される', '銀行振込でお支払い（名義の先頭に受付番号）'],
-      ['入金確認後、印刷・発送', `${esc(CFG.shipMethod)}で会社へ。追跡番号をアプリでお知らせ`],
-      ['アプリで配達を見届ける', '退職届が届けば、退職の意思表示は完了です'],
-    ].map((s, i) => `
-      <div class="step" style="cursor:default;">
-        <span class="s-num">${i + 1}</span>
-        <span><strong>${s[0]}</strong><small>${s[1]}</small></span>
-      </div>`).join('')}
+    <button class="btn btn-primary" data-go="order" style="margin-bottom:16px;">いますぐ依頼する</button>
+
+    <div class="section-title">ご利用の流れ</div>
+    <div class="card flow-card">
+      <div class="flow-row"><span class="f-num">1</span><span>フォームに入力して、署名する</span></div>
+      <div class="flow-row"><span class="f-num">2</span><span>銀行振込でお支払い</span></div>
+      <div class="flow-row"><span class="f-num">3</span><span>こちらが印刷して会社へ郵送<small>追跡番号で配達を見届けられます</small></span></div>
+    </div>
 
     <div class="card" style="margin-top:16px;">
-      <h3>⚖️ 法律上は2週間前でOK</h3>
+      <h3>法律上は2週間前でOK</h3>
       <p class="small">期間の定めのない雇用（正社員など）は、退職の意思表示が会社に<strong>到達してから2週間</strong>で退職できます（民法627条）。会社の承認は不要です。郵送日数を考えて、退職日は<strong>3週間以上先</strong>をおすすめします。</p>
     </div>
 
     <div class="card">
-      <h3>🚫 本サービスがやらないこと</h3>
+      <h3>本サービスがやらないこと</h3>
       <p class="small">会社との<strong>交渉・連絡・伝言は一切行いません</strong>（弁護士法により、弁護士以外は交渉できません）。本サービスは退職届の作成と郵送の<strong>事務代行のみ</strong>です。未払い賃金やハラスメント等の争いがある方は、弁護士・労働組合・労働基準監督署にご相談ください。</p>
       <p class="small">また、郵便のお届けには<strong>1〜3日</strong>かかります。<strong>「今すぐ・即日で会社に伝えたい」方には、お電話で連絡する退職代行サービスのほうが向いています。</strong>数日以上先の退職日で計画的に辞める方には、当サービスで十分です。</p>
     </div>

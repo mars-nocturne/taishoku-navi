@@ -4,11 +4,10 @@
   --blue: #182a52;        /* 主要アクション＝紺 */
   --blue-dark: #101d3b;
   --blue-light: #e8ecf5;
-  --shu: #c53a2b;         /* 朱印（ブランドマークのみ） */
   --ink: #1a1a1a;
-  --muted: #777770;
-  --line: #e2e0d8;
-  --bg: #f6f4ef;          /* オフホワイト */
+  --muted: #6b7280;
+  --line: #e3e8f1;
+  --bg: #f4f6fa;          /* ごく薄いブルーグレー */
   --card: #ffffff;
   --green: #15803d;
   --amber: #b45309;
@@ -33,7 +32,7 @@ body {
 .app-header {
   position: sticky; top: 0; z-index: 30;
   background: var(--navy);
-  color: #f6f4ef;
+  color: #fff;
   padding-top: env(safe-area-inset-top);
   box-shadow: 0 2px 12px rgba(16, 29, 59, .25);
 }
@@ -42,16 +41,6 @@ body {
   padding: 12px 16px; max-width: 720px; margin: 0 auto;
 }
 .brand { display: flex; align-items: center; gap: 12px; }
-/* 朱印風のブランドマーク */
-.brand-mark {
-  width: 40px; height: 40px; flex-shrink: 0;
-  background: linear-gradient(160deg, #d24a37, var(--shu));
-  border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: 21px; color: #fff;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .38), 0 2px 6px rgba(0, 0, 0, .25);
-  letter-spacing: 0;
-}
 .brand-text strong { display: block; font-size: 20px; font-weight: 900; line-height: 1.2; letter-spacing: .02em; }
 .brand-text small { font-size: 11px; opacity: .7; letter-spacing: .02em; }
 
@@ -77,13 +66,13 @@ body {
 }
 .card p { margin: 6px 0; font-size: 14px; }
 
-/* 紺のヒーロー（デザイン案1a）。下端は背景色に溶けるグラデで白カードが浮く */
+/* 紺のヒーロー（全幅・単色） */
 .hero {
   position: relative;
-  background: linear-gradient(180deg, var(--navy) 0%, #1f3563 62%, #1f3563 62%, var(--bg) 62%);
+  background: linear-gradient(180deg, var(--navy), #1f3563);
   border-radius: 0; border: 0;
-  margin: -18px -16px 16px;  /* .view のパディングを打ち消して全幅に */
-  padding: 28px 20px 20px;
+  margin: -18px -16px 20px;  /* .view のパディングを打ち消して全幅に */
+  padding: 28px 20px 26px;
   box-shadow: none;
 }
 .hero-badge {
@@ -95,14 +84,25 @@ body {
 .hero h2 { margin: 0 0 8px; font-size: 26px; font-weight: 900; letter-spacing: .01em; line-height: 1.5; color: #fff; }
 .hero p { margin: 0; font-size: 13px; line-height: 1.8; color: rgba(255, 255, 255, .85); }
 .hero-price {
-  margin-top: 20px; background: #fff; border-radius: 16px; padding: 16px 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+  background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px;
+  box-shadow: var(--shadow); margin-bottom: 16px;
 }
 .hero-price .hp-label { font-size: 11px; color: var(--muted); font-weight: 700; }
 .hero-price .hp-row { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
 .hero-price .hp-amount { font-size: 30px; font-weight: 900; color: var(--navy); }
 .hero-price .hp-note { font-size: 12px; color: #999; }
 .hero-price .hp-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+/* ===== ご利用の流れ（シンプルな行リスト） ===== */
+.flow-card { padding: 6px 16px; }
+.flow-row {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 13px 0; border-bottom: 1px solid #ecf0f7;
+  font-size: 14px;
+}
+.flow-row:last-child { border-bottom: 0; }
+.flow-row .f-num { color: var(--navy); font-weight: 800; font-size: 13px; flex-shrink: 0; }
+.flow-row small { display: block; font-size: 12px; color: var(--muted); }
 
 /* ===== ステップ（ホーム） ===== */
 .step {
@@ -129,13 +129,13 @@ body {
 .field { margin-bottom: 15px; }
 .field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; letter-spacing: .02em; }
 .field .req {
-  color: #fff; background: var(--shu); font-size: 10px; font-weight: 700;
+  color: #fff; background: var(--navy); font-size: 10px; font-weight: 700;
   padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 2px;
   letter-spacing: .08em;
 }
 .field .hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
 input, select, textarea {
-  width: 100%; padding: 12px 13px; border: 1px solid #d9d6cd; border-radius: 11px;
+  width: 100%; padding: 12px 13px; border: 1px solid #ccd4e3; border-radius: 11px;
   font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
   transition: border-color .15s ease, box-shadow .15s ease;
 }
@@ -147,7 +147,7 @@ input:focus, select:focus, textarea:focus {
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* セグメント切替（退職届/退職願） */
-.seg { display: flex; background: #ecebe4; border-radius: 12px; padding: 4px; margin-bottom: 14px; }
+.seg { display: flex; background: #e8ebf2; border-radius: 12px; padding: 4px; margin-bottom: 14px; }
 .seg button {
   flex: 1; border: 0; background: none; padding: 10px; border-radius: 9px;
   font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; font-family: inherit;
@@ -169,7 +169,7 @@ input:focus, select:focus, textarea:focus {
 }
 .btn-primary:active { background: var(--navy-deep); transform: translateY(1px); box-shadow: 0 1px 4px rgba(24, 42, 82, .3); }
 .btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(35, 31, 20, .05); }
-.btn-ghost:active { background: #f6f4ee; }
+.btn-ghost:active { background: #f0f3f9; }
 .btn-sm { padding: 8px 13px; font-size: 13px; width: auto; border-radius: 10px; }
 .btn-row { display: flex; gap: 10px; margin-top: 8px; }
 .btn-row .btn { flex: 1; }
@@ -183,7 +183,7 @@ input:focus, select:focus, textarea:focus {
 /* ===== チェックリスト ===== */
 .chk {
   display: flex; align-items: flex-start; gap: 10px;
-  padding: 12px 4px; border-bottom: 1px solid #eee9dd; cursor: pointer;
+  padding: 12px 4px; border-bottom: 1px solid #ecf0f7; cursor: pointer;
 }
 .chk:last-child { border-bottom: 0; }
 .chk input { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: var(--blue); }
@@ -193,7 +193,7 @@ input:focus, select:focus, textarea:focus {
 .chk input:checked ~ .c-body small { text-decoration: none; }
 /* フォーム内のチェック（同意・オプション）は取り消し線を付けない */
 .chk.chk-plain input:checked ~ .c-body { color: inherit; text-decoration: none; }
-.progress { height: 10px; background: #e5e3da; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+.progress { height: 10px; background: #e3e8f1; border-radius: 999px; overflow: hidden; margin-top: 10px; }
 .progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--navy), #2c4a8f); border-radius: 999px; transition: width .5s; }
 
 /* ===== アコーディオン（知識） ===== */
@@ -213,7 +213,7 @@ details.qa .qa-body p { margin: 6px 0; }
 
 /* ===== 縦書きプレビュー ===== */
 .preview-wrap {
-  background: #e9e9e4;
+  background: #e8ebf2;
   border: 1px solid var(--line); border-radius: var(--radius);
   padding: 18px 14px; overflow-x: auto;
   box-shadow: inset 0 1px 4px rgba(35, 31, 20, .07);
@@ -268,7 +268,7 @@ details.qa .qa-body p { margin: 6px 0; }
 .item-title { font-weight: 800; font-size: 15px; letter-spacing: .02em; }
 .item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .item-body { font-size: 14px; margin-top: 8px; }
-.badge-gray { background: #efece3; color: var(--muted); }
+.badge-gray { background: #eceff5; color: var(--muted); }
 
 .empty { text-align: center; padding: 48px 16px; color: var(--muted); }
 .empty .e-ico { font-size: 48px; }
@@ -286,7 +286,7 @@ details.qa .qa-body p { margin: 6px 0; }
 
 /* ===== 振込案内 ===== */
 .bank-box {
-  background: #fffaf0; border: 1px solid #e8d5a4; border-radius: var(--radius);
+  background: #f5f8ff; border: 1px solid #ccd8ef; border-radius: var(--radius);
   padding: 16px; margin: 14px 0;
   box-shadow: var(--shadow);
 }
@@ -294,11 +294,11 @@ details.qa .qa-body p { margin: 6px 0; }
   margin: 0 0 8px; font-size: 15px;
 }
 .bank-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
-.bank-table th, .bank-table td { border: 1px solid #e8d5a4; padding: 8px 10px; text-align: left; background: #fff; }
+.bank-table th, .bank-table td { border: 1px solid #ccd8ef; padding: 8px 10px; text-align: left; background: #fff; }
 .bank-table th { width: 30%; font-size: 12px; color: var(--muted); font-weight: 700; }
 
 /* ===== 署名キャンバス ===== */
-.sign-wrap { border: 2px dashed #cfc8b6; border-radius: 12px; background: #fffefb; position: relative; }
+.sign-wrap { border: 2px dashed #c4cfe3; border-radius: 12px; background: #fff; position: relative; }
 #signPad { width: 100%; height: 180px; display: block; touch-action: none; border-radius: 12px; }
 .sign-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; pointer-events: none; }
 
@@ -331,7 +331,7 @@ details.qa .qa-body p { margin: 6px 0; }
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
   display: flex;
-  background: rgba(255, 255, 253, .94);
+  background: rgba(255, 255, 255, .94);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
