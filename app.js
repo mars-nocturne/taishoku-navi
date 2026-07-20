@@ -1,5 +1,5 @@
 /* ============================================================
-   退職届ナビ — 退職届の作成・郵送代行アプリ
+   格安退職便ヤメレター — 退職届の作成・郵送代行アプリ
    依頼者：フォーム入力＋電子署名 → 受付番号発行 → 銀行振込 → 追跡
    運営者：⚙️からログイン → 管理タブで入金確認・印刷・発送
    ============================================================ */
@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ---------- 下書き（依頼フォーム） ---------- */
 const defaultDraft = () => ({
   docType: 'todoke', eraMode: 'wareki',
+  empType: 'mukei',          // 雇用形態：mukei=無期雇用 / yuki=有期雇用
   name: '', dept: '', myPostal: '', myAddr: '',
   company: '', companyPostal: '', companyAddr: '',
   presTitle: '代表取締役', presName: '', envDept: '人事部',
@@ -435,6 +436,16 @@ function renderOrder() {
 
     <div class="card">
       <h3>あなたの情報</h3>
+      <div class="field">
+        <label>雇用形態<span class="req">必須</span></label>
+        <select data-key="empType">
+          <option value="mukei" ${D.empType !== 'yuki' ? 'selected' : ''}>無期雇用（正社員・無期パートなど、契約期間の定めなし）</option>
+          <option value="yuki" ${D.empType === 'yuki' ? 'selected' : ''}>有期雇用（契約社員・派遣・有期パートなど、契約期間の定めあり）</option>
+        </select>
+        ${D.empType === 'yuki'
+          ? `<div class="hint" style="color:var(--red);">⚠️ 契約期間の定めがある場合、「到達から2週間で退職成立」（民法627条）は<strong>適用されません</strong>。原則として ①契約期間の満了 ②やむを得ない事由（民法628条） ③最初の契約から通算1年経過（労働基準法附則137条） ④会社との合意 のいずれかが必要です。判断に迷う場合は「退職願（お伺い）」でのご依頼をおすすめします。</div>`
+          : `<div class="hint">契約社員・派遣・有期パートの方は「有期雇用」を選択してください。退職のルールが異なります</div>`}
+      </div>
       ${f('name', '氏名', '山田 太郎', true)}
       ${f('dept', '所属部署', '営業部（なければ空欄でOK）', false)}
       ${f('myPostal', '自宅の郵便番号', '123-4567', true)}
@@ -459,7 +470,7 @@ function renderOrder() {
         ${f('taishokuDate', '退職日', '', true, '', 'date')}
         ${f('submitDate', '書類の日付', '', true, '', 'date')}
       </div>
-      <p class="small muted">郵送の到達から2週間で退職できます（民法627条）。余裕をもって<strong>3週間以上先</strong>の退職日をおすすめします。書類の日付は通常、依頼日のままでOKです。</p>
+      <p class="small muted">郵送の到達から2週間で退職できます（民法627条・<strong>無期雇用の場合</strong>）。余裕をもって<strong>3週間以上先</strong>の退職日をおすすめします。書類の日付は通常、依頼日のままでOKです。</p>
       ${f('shipDate', '発送希望日（任意）', '', false, '空欄なら入金確認後、原則3営業日以内に発送します。指定する場合は、先に入金確認が必要なこと・配達に1〜3日かかることを見込んでください。到着日のお約束はできません', 'date')}
       <div class="seg" id="eraSeg">
         <button data-era="wareki" class="${D.eraMode === 'wareki' ? 'on' : ''}">和暦（令和）</button>
@@ -528,6 +539,8 @@ function renderOrder() {
     inp.addEventListener('input', handler);
     inp.addEventListener('change', handler);
   });
+  // 雇用形態は切替時に注意書きを出し分けるため再描画
+  view().querySelector('select[data-key="empType"]').addEventListener('change', () => renderOrder());
   $('#yukyuUse').addEventListener('change', () => {
     D.yukyuUse = $('#yukyuUse').checked;
     if (D.yukyuUse && !D.yukyuFrom) D.yukyuFrom = addDays(new Date(), 3);
@@ -605,6 +618,8 @@ async function submitOrder() {
     if (D.shipDate > addDays(new Date(D.taishokuDate), -16) &&
         !confirm('発送希望日から退職日までの余裕が少なめです。\n配達（発送から1〜3日）の到達後2週間で退職が成立するため、退職日までに2週間を確保できない可能性があります。\nこのまま確定しますか？')) return;
   }
+  if (D.empType === 'yuki' &&
+      !confirm('雇用形態が「有期雇用（契約期間の定めあり）」になっています。\n有期雇用では「到達から2週間で退職成立」（民法627条）は適用されず、契約期間途中の退職には、やむを得ない事由（民法628条）・最初の契約から1年経過（労基法附則137条）・会社との合意などが必要です。\n内容を理解した上で、このまま依頼を確定しますか？')) return;
   if (!signed) { toast('署名を入力してください'); return; }
   if (!($('#ag1').checked && $('#ag2').checked && $('#ag3').checked)) {
     toast('確認事項3つすべてにチェックしてください'); return;
@@ -675,7 +690,9 @@ async function renderTrack() {
         </div>
         ${p.shipDate && ['awaiting_payment', 'paid'].includes(o.status) ? `<div class="item-body small muted">📅 発送希望日：${fmtDateH(p.shipDate, 'wareki')}（入金確認後に発送します）</div>` : ''}
         ${o.status === 'shipped' && o.tracking_no ? `<div class="item-body">🚚 追跡番号：<strong>${esc(o.tracking_no)}</strong>（郵便局の追跡サービスで確認できます）</div>` : ''}
-        ${o.status === 'shipped' ? `<div class="item-body small muted">配達されると退職の意思表示は到達済み。到達から2週間で退職成立です（民法627条）。</div>` : ''}
+        ${o.status === 'shipped' ? `<div class="item-body small muted">${p.empType === 'yuki'
+          ? '配達されると退職の意思表示は会社に到達済みです。有期雇用の場合、退職成立の時期は契約内容・お申し出の内容によります。'
+          : '配達されると退職の意思表示は到達済み。到達から2週間で退職成立です（民法627条）。'}</div>` : ''}
         ${o.status === 'awaiting_payment' ? bankHtml(o.order_no) + `
           <button class="btn btn-ghost btn-sm" data-cancel="${o.id}">依頼をキャンセルする</button>` : ''}
         ${o.status === 'done' ? `<div class="item-body">🎉 おつかれさまでした。次のキャリアへ前向きに！</div>` : ''}
@@ -728,6 +745,7 @@ function renderKnow() {
     ['⚖️ 会社の許可がなくても辞められるの？', `<p>辞められます。期間の定めのない雇用（正社員など）は、<strong>退職の意思表示が到達してから2週間</strong>で雇用は終了します（民法627条1項）。会社の「承認」は法律上不要です。</p><p>だからこそ「届いた記録が残る郵送」が有効なのです。</p>`],
     ['📅 就業規則に「1ヶ月前に申し出ること」とあるけど？', `<p>就業規則より民法が優先するというのが一般的な理解です。2週間前の通知で退職自体は可能です。</p><p>円満退職を目指すなら、可能な範囲で就業規則に合わせるとトラブルが減ります。「通知→残りは有給消化」も定番です。</p>`],
     ['📄 「退職届」と「退職願」の違いは？', `<p><strong>退職届</strong>＝退職の決定を通知。原則撤回できません。確実に辞めたい人向け。</p><p><strong>退職願</strong>＝お願いベース。会社が承諾するまで撤回の余地あり。</p>`],
+    ['📃 契約社員・派遣（有期雇用）でも使える？', `<p>ご利用いただけますが、ルールが異なります。契約期間の定めがある場合、「到達から2週間で退職成立」（民法627条）は<strong>適用されません</strong>。</p><p>原則として、①契約期間の満了 ②やむを得ない事由がある（民法628条。体調不良・家庭の事情など） ③最初の契約から通算1年を超えて働いている（労働基準法附則137条） ④会社との合意 のいずれかが必要です。</p><p>③に当てはまる方は申し出により退職できます。判断に迷う場合は<strong>退職願（お伺い）</strong>での提出をおすすめします。</p>`],
     ['🏖️ 残っている有給休暇は使える？', `<p>使えます。年次有給休暇は労働基準法39条で保障された権利で、会社の許可は不要です。退職日までの間に消化すれば、出社せずに退職日を迎えられます。</p>`],
     ['😨 「損害賠償を請求するぞ」と脅されたら？', `<p>退職自体を理由とする損害賠償が認められることはまずありません。労働基準法16条は「辞めたら違約金」のような取り決め自体を禁止しています。</p><p>続く場合は労働基準監督署・労働組合・弁護士へ。やり取りは記録を。</p>`],
     ['📪 会社が受け取りを拒否したら？', `<p>意思表示は配達された時点で到達＝効力が生じるとされ、受け取り拒否や「読んでいない」は通用しにくいです。${esc(CFG.shipMethod)}の配達記録がその証拠になります。</p>`],
@@ -808,7 +826,7 @@ async function renderAdmin() {
             差出人：〒${esc(p.myPostal || '')} ${esc(p.myAddr || '')}<br>
             宛先：〒${esc(p.companyPostal || '')} ${esc(p.companyAddr || '')}<br>
             宛名：${esc(p.company || '')} ${esc(p.envDept ? p.envDept + ' 御中' : (p.presTitle + ' ' + p.presName + ' 様'))}<br>
-            書類：${p.docType === 'negai' ? '退職願' : '退職届'}／書類日付 ${fmtDateH(p.submitDate, 'wareki')}／${yen(p.price)}<br>
+            書類：${p.docType === 'negai' ? '退職願' : '退職届'}／雇用形態 ${p.empType === 'yuki' ? '<strong style="color:var(--red);">有期雇用</strong>' : '無期雇用'}／書類日付 ${fmtDateH(p.submitDate, 'wareki')}／${yen(p.price)}<br>
             オプション：私物=${(SHIBUTSU[p.shibutsu] || SHIBUTSU.none).label}／有給=${p.yukyuUse && p.yukyuFrom ? fmtDateH(p.yukyuFrom, 'wareki') + 'から取得' : '記載なし'}<br>
             発送希望日：${p.shipDate ? fmtDateH(p.shipDate, 'wareki') : '指定なし（入金確認後すみやかに発送）'}
             ${p.sig ? `<div>署名：<img src="${p.sig}" alt="署名" style="max-height:140px;border:1px solid var(--line);border-radius:6px;background:#fff;"></div>` : ''}

@@ -1,5 +1,5 @@
 /* ============================================================
-   退職届ナビ — 注文通知 Edge Function
+   格安退職便ヤメレター — 注文通知 Edge Function
    ------------------------------------------------------------
    taishoku_orders の変化を Database Webhook で受けてメールを送る。
 
@@ -20,13 +20,13 @@
      WEBHOOK_SECRET … Webhook のヘッダー x-webhook-secret と同じ値（合言葉）
    任意:
      NOTIFY_TO      … 運営者通知の宛先（省略時は DEFAULT_TO）
-     MAIL_FROM      … 差出人。独自ドメイン認証後は「退職届ナビ <info@あなたのドメイン>」
+     MAIL_FROM      … 差出人。独自ドメイン認証後は「格安退職便ヤメレター <info@あなたのドメイン>」
                        のように設定する（省略時は Resend のオンボーディング用）
      CUSTOMER_MAIL  … "on" でお客様宛メールを有効化
    ============================================================ */
 
 const DEFAULT_TO = "positive.career.2026@gmail.com";
-const DEFAULT_FROM = "退職届ナビ <onboarding@resend.dev>";
+const DEFAULT_FROM = "ヤメレター <onboarding@resend.dev>";
 const APP_URL = "https://taishoku-yasui.com/";
 
 /* 振込先（config.js の bank と同じ内容を維持すること） */
@@ -61,6 +61,7 @@ function orderSummary(r: OrderRecord): string {
     `受付番号　：${s(r.order_no)}`,
     `書類　　　：${d.docType === "negai" ? "退職願" : "退職届"}`,
     `氏名　　　：${s(d.name)}`,
+    `雇用形態　：${d.empType === "yuki" ? "有期雇用（※2週間ルール対象外に注意）" : "無期雇用"}`,
     `会社　　　：${s(d.company)}`,
     `退職日　　：${s(d.taishokuDate)}`,
     `発送希望日：${typeof d.shipDate === "string" && d.shipDate ? d.shipDate : "指定なし（入金確認後すみやかに）"}`,
@@ -73,7 +74,7 @@ function orderSummary(r: OrderRecord): string {
 
 const SIGNATURE = [
   "──────────────────",
-  "退職届ナビ（ポジティブキャリア）",
+  "格安退職便ヤメレター（ポジティブキャリア）",
   APP_URL,
   "このメールに返信いただければ運営者に届きます。",
 ].join("\n");
@@ -84,14 +85,15 @@ function customerMail(kind: "received" | "paid" | "shipped" | "done" | "cancelle
   const d = p(r);
   const name = typeof d.name === "string" && d.name.trim() ? `${d.name.trim()} 様` : "お客様";
   const no = s(r.order_no);
+  const isYuki = d.empType === "yuki";
 
   if (kind === "received") {
     return {
-      subject: `【退職届ナビ】ご依頼を受け付けました（受付番号 ${no}）`,
+      subject: `【ヤメレター】ご依頼を受け付けました（受付番号 ${no}）`,
       text: [
         `${name}`,
         "",
-        "退職届ナビをご利用いただきありがとうございます。",
+        "格安退職便ヤメレターをご利用いただきありがとうございます。",
         "以下の内容でご依頼を受け付けました。",
         "",
         `受付番号：${no}`,
@@ -115,7 +117,7 @@ function customerMail(kind: "received" | "paid" | "shipped" | "done" | "cancelle
   }
   if (kind === "paid") {
     return {
-      subject: `【退職届ナビ】ご入金を確認しました（受付番号 ${no}）`,
+      subject: `【ヤメレター】ご入金を確認しました（受付番号 ${no}）`,
       text: [
         `${name}`,
         "",
@@ -129,7 +131,7 @@ function customerMail(kind: "received" | "paid" | "shipped" | "done" | "cancelle
   }
   if (kind === "shipped") {
     return {
-      subject: `【退職届ナビ】退職届を発送しました（受付番号 ${no}）`,
+      subject: `【ヤメレター】退職届を発送しました（受付番号 ${no}）`,
       text: [
         `${name}`,
         "",
@@ -138,8 +140,15 @@ function customerMail(kind: "received" | "paid" | "shipped" | "done" | "cancelle
         `追跡番号：${s(r.tracking_no)}`,
         "（日本郵便の追跡サービスで配達状況を確認できます）",
         "",
-        "配達された時点で退職の意思表示は会社に到達したことになり、",
-        "到達から2週間で退職が成立します（民法627条）。",
+        ...(isYuki
+          ? [
+            "配達された時点で、退職の意思表示は会社に到達しています。",
+            "（有期雇用のため、退職成立の時期は契約内容・お申し出の内容によります）",
+          ]
+          : [
+            "配達された時点で退職の意思表示は会社に到達したことになり、",
+            "到達から2週間で退職が成立します（民法627条）。",
+          ]),
         "配達状況はアプリの「追跡」タブでも確認できます。",
         "",
         SIGNATURE,
@@ -148,15 +157,19 @@ function customerMail(kind: "received" | "paid" | "shipped" | "done" | "cancelle
   }
   if (kind === "done") {
     return {
-      subject: `【退職届ナビ】退職届が会社に配達されました（受付番号 ${no}）`,
+      subject: `【ヤメレター】退職届が会社に配達されました（受付番号 ${no}）`,
       text: [
         `${name}`,
         "",
         "退職届の配達が確認できましたので、ご連絡いたします。",
         "",
         "配達された時点で、退職の意思表示は会社に到達しています。",
-        "到達から2週間が経過すると退職が成立します（民法627条）。",
-        "会社の承認は必要ありません。",
+        ...(isYuki
+          ? ["（有期雇用のため、退職成立の時期は契約内容・お申し出の内容によります）"]
+          : [
+            "到達から2週間が経過すると退職が成立します（民法627条）。",
+            "会社の承認は必要ありません。",
+          ]),
         "",
         "退職にあたっては、次の手続きもお忘れなく：",
         "・健康保険の切り替え（退職日の翌日から14日以内が目安）",
@@ -173,7 +186,7 @@ function customerMail(kind: "received" | "paid" | "shipped" | "done" | "cancelle
   }
   if (kind === "cancelled") {
     return {
-      subject: `【退職届ナビ】キャンセルを承りました（受付番号 ${no}）`,
+      subject: `【ヤメレター】キャンセルを承りました（受付番号 ${no}）`,
       text: [
         `${name}`,
         "",
@@ -237,14 +250,14 @@ Deno.serve(async (req) => {
 
   if (type === "INSERT") {
     operatorMail = {
-      subject: `【退職届ナビ】新しい依頼 ${s(record.order_no)}`,
+      subject: `【ヤメレター】新しい依頼 ${s(record.order_no)}`,
       text: `新しい依頼が入りました。入金をお待ちください。\n\n${orderSummary(record)}`,
     };
     customerKind = "received";
   } else if (type === "UPDATE" && record.status !== old_record?.status) {
     if (record.status === "cancelled") {
       operatorMail = {
-        subject: `【退職届ナビ】依頼キャンセル ${s(record.order_no)}`,
+        subject: `【ヤメレター】依頼キャンセル ${s(record.order_no)}`,
         text: `依頼がキャンセルされました。入金済みの場合は返金対応をしてください。\n\n${orderSummary(record)}`,
       };
       customerKind = "cancelled";

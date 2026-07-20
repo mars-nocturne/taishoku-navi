@@ -1,14 +1,14 @@
 {
-  "name": "退職届ナビ｜退職届の作成・郵送代行",
-  "short_name": "退職届ナビ",
+  "name": "格安退職便ヤメレター｜退職届の作成・郵送代行",
+  "short_name": "ヤメレター",
   "description": "正式な退職届を作成し、あなたに代わって会社へ郵送するサービス。フォームに入力して署名するだけ。追跡番号で配達を見届けられます。",
   "lang": "ja",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f6f7f9",
-  "theme_color": "#1d4ed8",
+  "background_color": "#f5f3ec",
+  "theme_color": "#182a52",
   "categories": ["productivity", "business"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

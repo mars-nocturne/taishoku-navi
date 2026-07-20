@@ -1,4 +1,4 @@
-# 退職届ナビ — 退職届の作成・郵送代行アプリ
+# 格安退職便ヤメレター — 退職届の作成・郵送代行アプリ
 
 お客さんがフォームに入力して電子署名するだけで、運営者（ポジティブキャリア）が
 正式な縦書き退職届を印刷し、会社へ郵送する**請負サービス**のPWAアプリ。
@@ -55,7 +55,7 @@
    - タイプ HTTP Request / POST、URL `https://drkxgjvoqgqjubderbab.supabase.co/functions/v1/notify-order`
    - HTTP ヘッダーに `x-webhook-secret: ＜手順2と同じ合言葉＞` を追加
 4. アプリから試しに依頼を1件入れて、`positive.career.2026@gmail.com` に
-   「【退職届ナビ】新しい依頼 T-xxxx」が届けば完了（テスト注文は管理タブでキャンセル）
+   「【ヤメレター】新しい依頼 T-xxxx」が届けば完了（テスト注文は管理タブでキャンセル）
 
 通知先や差出人を変えるときはシークレット `NOTIFY_TO` / `MAIL_FROM` を設定する。
 
@@ -68,7 +68,7 @@
 2. Resend ダッシュボード > Domains > Add Domain でドメインを登録し、
    表示される DNS レコード（DKIM 等）をドメイン側に追加して Verify
 3. シークレットを追加：
-   - `MAIL_FROM` = `退職届ナビ <info@あなたのドメイン>`
+   - `MAIL_FROM` = `格安退職便ヤメレター <info@あなたのドメイン>`
    - `CUSTOMER_MAIL` = `on`
 4. ダッシュボードの Edge Functions > notify-order > Code で最新の
    `supabase/functions/notify-order/index.ts` を貼り直して再デプロイ
