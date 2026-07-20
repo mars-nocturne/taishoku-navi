@@ -372,17 +372,21 @@ const view = () => $('#view');
 function renderHome() {
   view().innerHTML = `
     <div class="hero">
+      <span class="hero-badge">全国対応・郵送で完結</span>
       <h2>言いにくいことは、<br>手紙にしよう。</h2>
       <p>正式な退職届をお作りして、あなたに代わって<strong>${esc(CFG.shipMethod)}で会社へ郵送</strong>します。手渡しも、対面も、電話も、もういらない。</p>
+      <div class="hero-price">
+        <div class="hp-label">安心の定額プラン</div>
+        <div class="hp-row">
+          <span class="hp-amount">${yen(CFG.price)}</span>
+          <span class="hp-note">（税込・追加費用なし）</span>
+        </div>
+        <div class="hp-sub">退職届の作成＋印刷＋封入＋${esc(CFG.shipMethod)}での発送まで全部込み</div>
+      </div>
     </div>
 
-    <div class="card center">
-      <p class="muted small" style="margin:0;">料金（税込・前払い）</p>
-      <p style="font-size:34px;font-weight:800;color:var(--blue);margin:2px 0;">${yen(CFG.price)}</p>
-      <p class="small muted" style="margin:0;">退職届の作成＋印刷＋封入＋${esc(CFG.shipMethod)}での発送まで全部込み</p>
-    </div>
-
-    <button class="btn btn-primary" data-go="order" style="margin-bottom:16px;">📝 いますぐ依頼する</button>
+    <button class="btn btn-primary" data-go="order" style="margin-bottom:6px;">📝 いますぐ依頼する</button>
+    <p class="small muted center" style="margin:0 0 16px;">追加費用なし・全国どこでも対応</p>
 
     <div class="section-title">📋 ご利用の流れ</div>
     ${[

@@ -1,5 +1,5 @@
 /* 格安退職便ヤメレター Service Worker — オフライン対応 */
-const CACHE = 'taishoku-app-v18';
+const CACHE = 'taishoku-app-v19';
 const ASSETS = [
   './',
   './index.html',

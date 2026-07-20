@@ -1,22 +1,20 @@
 :root {
-  --navy: #182a52;        /* ヘッダー・濃紺 */
+  --navy: #182a52;        /* ブランドの紺（1a 安心・誠実） */
   --navy-deep: #101d3b;
-  --blue: #2856c8;        /* 主要アクション */
-  --blue-dark: #1e429b;
-  --blue-light: #e4ebfa;
-  --shu: #c53a2b;         /* 朱印の赤（アクセント） */
-  --kin: #c9a353;         /* 金茶（控えめな飾り） */
-  --ink: #23262e;
-  --muted: #716d64;
-  --line: #e4dfd3;
-  --bg: #f5f3ec;          /* 和紙っぽい生成り */
+  --blue: #182a52;        /* 主要アクション＝紺 */
+  --blue-dark: #101d3b;
+  --blue-light: #e8ecf5;
+  --shu: #c53a2b;         /* 朱印（ブランドマークのみ） */
+  --ink: #1a1a1a;
+  --muted: #777770;
+  --line: #e2e0d8;
+  --bg: #f6f4ef;          /* オフホワイト */
   --card: #ffffff;
   --green: #15803d;
   --amber: #b45309;
   --red: #b91c1c;
   --radius: 16px;
-  --shadow: 0 1px 2px rgba(35, 31, 20, .06), 0 6px 18px rgba(35, 31, 20, .06);
-  --serif: "Shippori Mincho B1", "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
+  --shadow: 0 1px 2px rgba(35, 31, 20, .05), 0 6px 18px rgba(35, 31, 20, .06);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -25,8 +23,6 @@ html, body { margin: 0; padding: 0; }
 body {
   font-family: "Noto Sans JP", -apple-system, "Hiragino Sans", "Segoe UI", system-ui, sans-serif;
   background: var(--bg);
-  /* 和紙の質感（ごく薄い斜めテクスチャ） */
-  background-image: repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(120, 100, 60, .015) 5px, rgba(120, 100, 60, .015) 6px);
   color: var(--ink);
   line-height: 1.65;
   padding-bottom: calc(76px + env(safe-area-inset-bottom));
@@ -36,16 +32,10 @@ body {
 /* ===== ヘッダー ===== */
 .app-header {
   position: sticky; top: 0; z-index: 30;
-  background: linear-gradient(165deg, #1e3462, var(--navy) 55%, var(--navy-deep));
-  color: #fff;
+  background: var(--navy);
+  color: #f6f4ef;
   padding-top: env(safe-area-inset-top);
-  box-shadow: 0 2px 12px rgba(16, 29, 59, .28);
-}
-/* 帯：朱→金の細いライン（公文書の飾り罫のイメージ） */
-.app-header::after {
-  content: ""; display: block; height: 3px;
-  background: linear-gradient(90deg, var(--shu) 0 30%, var(--kin) 70%, var(--shu));
-  opacity: .9;
+  box-shadow: 0 2px 12px rgba(16, 29, 59, .25);
 }
 .app-header-inner {
   display: flex; align-items: center; justify-content: space-between;
@@ -54,29 +44,23 @@ body {
 .brand { display: flex; align-items: center; gap: 12px; }
 /* 朱印風のブランドマーク */
 .brand-mark {
-  width: 42px; height: 42px; flex-shrink: 0;
+  width: 40px; height: 40px; flex-shrink: 0;
   background: linear-gradient(160deg, #d24a37, var(--shu));
   border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif); font-weight: 700; font-size: 22px; color: #fff;
+  font-weight: 900; font-size: 21px; color: #fff;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .38), 0 2px 6px rgba(0, 0, 0, .25);
   letter-spacing: 0;
 }
-.brand-text strong { display: block; font-family: var(--serif); font-size: 19px; line-height: 1.25; letter-spacing: .12em; }
-.brand-text small { font-size: 11px; opacity: .78; letter-spacing: .04em; }
+.brand-text strong { display: block; font-size: 20px; font-weight: 900; line-height: 1.2; letter-spacing: .02em; }
+.brand-text small { font-size: 11px; opacity: .7; letter-spacing: .02em; }
 
 /* ===== ビュー ===== */
 .view { max-width: 720px; margin: 0 auto; padding: 18px 16px; }
 .section-title {
-  font-family: var(--serif); font-size: 16.5px; font-weight: 700; letter-spacing: .08em;
-  margin: 6px 0 14px; padding-bottom: 8px;
+  font-size: 15px; font-weight: 800; letter-spacing: .02em;
+  margin: 6px 0 12px;
   display: flex; align-items: center; gap: 8px;
-  border-bottom: 1px solid var(--line);
-  position: relative;
-}
-.section-title::after {
-  content: ""; position: absolute; left: 0; bottom: -1px;
-  width: 44px; height: 2px; background: var(--shu); border-radius: 2px;
 }
 .muted { color: var(--muted); }
 .center { text-align: center; }
@@ -88,34 +72,37 @@ body {
   padding: 18px 16px; box-shadow: var(--shadow); margin-bottom: 14px;
 }
 .card h3 {
-  margin: 0 0 10px; font-size: 15px; letter-spacing: .04em;
-  padding-left: 10px; border-left: 3px solid var(--shu);
+  margin: 0 0 10px; font-size: 15px; font-weight: 800; letter-spacing: .02em;
   line-height: 1.4;
 }
 .card p { margin: 6px 0; font-size: 14px; }
 
+/* 紺のヒーロー（デザイン案1a）。下端は背景色に溶けるグラデで白カードが浮く */
 .hero {
-  position: relative; overflow: hidden;
-  background: #fffdf6;
-  border: 1px solid #ddd5c2; border-radius: var(--radius);
-  padding: 22px 20px; margin-bottom: 16px;
-  box-shadow: var(--shadow);
+  position: relative;
+  background: linear-gradient(180deg, var(--navy) 0%, #1f3563 62%, #1f3563 62%, var(--bg) 62%);
+  border-radius: 0; border: 0;
+  margin: -18px -16px 16px;  /* .view のパディングを打ち消して全幅に */
+  padding: 28px 20px 20px;
+  box-shadow: none;
 }
-/* 額縁のような内側の細罫 */
-.hero::before {
-  content: ""; position: absolute; inset: 6px;
-  border: 1px solid rgba(150, 130, 80, .25); border-radius: calc(var(--radius) - 6px);
-  pointer-events: none;
+.hero-badge {
+  display: inline-block; margin-bottom: 14px;
+  background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 11px; font-weight: 700; color: #fff;
 }
-/* 透かしの縦書き「退職届」 */
-.hero::after {
-  content: "退職届"; position: absolute; top: 12px; right: 16px;
-  writing-mode: vertical-rl; font-family: var(--serif); font-weight: 700;
-  font-size: 30px; letter-spacing: .35em; color: rgba(60, 45, 20, .07);
-  pointer-events: none;
+.hero h2 { margin: 0 0 8px; font-size: 26px; font-weight: 900; letter-spacing: .01em; line-height: 1.5; color: #fff; }
+.hero p { margin: 0; font-size: 13px; line-height: 1.8; color: rgba(255, 255, 255, .85); }
+.hero-price {
+  margin-top: 20px; background: #fff; border-radius: 16px; padding: 16px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
 }
-.hero h2 { margin: 0 0 8px; font-family: var(--serif); font-size: 22px; letter-spacing: .1em; line-height: 1.4; }
-.hero p { margin: 0; font-size: 13px; color: var(--muted); position: relative; }
+.hero-price .hp-label { font-size: 11px; color: var(--muted); font-weight: 700; }
+.hero-price .hp-row { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
+.hero-price .hp-amount { font-size: 30px; font-weight: 900; color: var(--navy); }
+.hero-price .hp-note { font-size: 12px; color: #999; }
+.hero-price .hp-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
 /* ===== ステップ（ホーム） ===== */
 .step {
@@ -130,7 +117,7 @@ body {
   width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
   background: var(--blue-light); color: var(--blue);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif); font-weight: 700; font-size: 16px;
+  font-weight: 800; font-size: 15px;
   box-shadow: inset 0 0 0 1px rgba(40, 86, 200, .18);
 }
 .step.done .s-num { background: #ddf3e4; color: var(--green); box-shadow: inset 0 0 0 1px rgba(21, 128, 61, .2); }
@@ -148,8 +135,8 @@ body {
 }
 .field .hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
 input, select, textarea {
-  width: 100%; padding: 12px 13px; border: 1px solid #d8d2c2; border-radius: 11px;
-  font-size: 16px; font-family: inherit; background: #fffefb; color: var(--ink);
+  width: 100%; padding: 12px 13px; border: 1px solid #d9d6cd; border-radius: 11px;
+  font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 input:focus, select:focus, textarea:focus {
@@ -160,7 +147,7 @@ input:focus, select:focus, textarea:focus {
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* セグメント切替（退職届/退職願） */
-.seg { display: flex; background: #ece8dc; border-radius: 12px; padding: 4px; margin-bottom: 14px; }
+.seg { display: flex; background: #ecebe4; border-radius: 12px; padding: 4px; margin-bottom: 14px; }
 .seg button {
   flex: 1; border: 0; background: none; padding: 10px; border-radius: 9px;
   font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; font-family: inherit;
@@ -176,11 +163,11 @@ input:focus, select:focus, textarea:focus {
   transition: transform .1s ease, box-shadow .15s ease, background .15s ease;
 }
 .btn-primary {
-  background: linear-gradient(180deg, #315fd2, var(--blue) 60%, #234daf);
+  background: var(--navy);
   color: #fff;
-  box-shadow: 0 3px 10px rgba(40, 86, 200, .32), inset 0 1px 0 rgba(255, 255, 255, .18);
+  box-shadow: 0 4px 14px rgba(24, 42, 82, .28);
 }
-.btn-primary:active { background: var(--blue-dark); transform: translateY(1px); box-shadow: 0 1px 4px rgba(40, 86, 200, .3); }
+.btn-primary:active { background: var(--navy-deep); transform: translateY(1px); box-shadow: 0 1px 4px rgba(24, 42, 82, .3); }
 .btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(35, 31, 20, .05); }
 .btn-ghost:active { background: #f6f4ee; }
 .btn-sm { padding: 8px 13px; font-size: 13px; width: auto; border-radius: 10px; }
@@ -206,8 +193,8 @@ input:focus, select:focus, textarea:focus {
 .chk input:checked ~ .c-body small { text-decoration: none; }
 /* フォーム内のチェック（同意・オプション）は取り消し線を付けない */
 .chk.chk-plain input:checked ~ .c-body { color: inherit; text-decoration: none; }
-.progress { height: 10px; background: #e9e4d6; border-radius: 999px; overflow: hidden; margin-top: 10px; }
-.progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--blue), #5a86e8); border-radius: 999px; transition: width .5s; }
+.progress { height: 10px; background: #e5e3da; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+.progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--navy), #2c4a8f); border-radius: 999px; transition: width .5s; }
 
 /* ===== アコーディオン（知識） ===== */
 details.qa {
@@ -219,14 +206,14 @@ details.qa summary {
   display: flex; align-items: center; gap: 8px;
 }
 details.qa summary::-webkit-details-marker { display: none; }
-details.qa summary::before { content: "▸"; color: var(--shu); transition: transform .15s; }
+details.qa summary::before { content: "▸"; color: var(--navy); transition: transform .15s; }
 details.qa[open] summary::before { transform: rotate(90deg); }
 details.qa .qa-body { padding: 0 0 15px; font-size: 13px; color: #43413a; }
 details.qa .qa-body p { margin: 6px 0; }
 
 /* ===== 縦書きプレビュー ===== */
 .preview-wrap {
-  background: linear-gradient(180deg, #e9e5d9, #e3dfd2);
+  background: #e9e9e4;
   border: 1px solid var(--line); border-radius: var(--radius);
   padding: 18px 14px; overflow-x: auto;
   box-shadow: inset 0 1px 4px rgba(35, 31, 20, .07);
@@ -278,7 +265,7 @@ details.qa .qa-body p { margin: 6px 0; }
   padding: 15px 14px; margin-bottom: 10px; box-shadow: var(--shadow);
 }
 .item-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.item-title { font-family: var(--serif); font-weight: 700; font-size: 16px; letter-spacing: .04em; }
+.item-title { font-weight: 800; font-size: 15px; letter-spacing: .02em; }
 .item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .item-body { font-size: 14px; margin-top: 8px; }
 .badge-gray { background: #efece3; color: var(--muted); }
@@ -305,7 +292,6 @@ details.qa .qa-body p { margin: 6px 0; }
 }
 .bank-box h3 {
   margin: 0 0 8px; font-size: 15px;
-  padding-left: 10px; border-left: 3px solid var(--kin);
 }
 .bank-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
 .bank-table th, .bank-table td { border: 1px solid #e8d5a4; padding: 8px 10px; text-align: left; background: #fff; }
@@ -328,7 +314,7 @@ details.qa .qa-body p { margin: 6px 0; }
   animation: slideUp .25s ease;
 }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal h3 { margin: 0 0 16px; font-family: var(--serif); font-size: 17px; letter-spacing: .06em; }
+.modal h3 { margin: 0 0 16px; font-size: 17px; font-weight: 800; letter-spacing: .02em; }
 
 .icon-btn {
   background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22); color: #fff;
@@ -364,7 +350,7 @@ details.qa .qa-body p { margin: 6px 0; }
 }
 .tab .tab-ico { font-size: 21px; filter: grayscale(1); opacity: .55; transition: filter .15s ease, opacity .15s ease; }
 .tab.active { color: var(--blue); font-weight: 700; }
-.tab.active::before { background: var(--shu); }
+.tab.active::before { background: var(--navy); }
 .tab.active .tab-ico { filter: none; opacity: 1; }
 
 /* ===== トースト ===== */
